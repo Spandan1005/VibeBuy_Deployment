@@ -99,6 +99,35 @@ This guide details how to distribute the codebase across your 4 VMs and start ea
 
 ---
 
+---
+
+## 5. Network & SSH Configuration (Critical)
+
+Since only the **Frontend VM** has internet access, it will act as your **"Jump Box"** (Bastion Host).
+
+### Why you need SSH on ALL VMs:
+1.  **Management**: You cannot directly SSH into the Backend/Database VMs from your laptop if they are isolated on the VLAN (unless you have specific routing setup). You will SSH into the **Frontend VM** first, and then from there, SSH into the others.
+2.  **File Transfer**: Since Backend/DB/DevOps VMs have **no internet**, you cannot run `git clone` or `npm install` directly on them easily.
+    *   **Strategy**: Download everything to the **Frontend VM** first.
+    *   **Transfer**: Use `scp` (Secure Copy) to move folders from Frontend VM to the others.
+
+### Enable SSH
+Ensure `openssh-server` is installed and running on **ALL** Linux networking VMs.
+```bash
+sudo apt-get install openssh-server
+sudo systemctl enable ssh
+sudo systemctl start ssh
+```
+
+### File Transfer Example
+From the **Frontend VM**, run this to copy the backend code to the Backend VM:
+```bash
+# syntax: scp -r [source_folder] [username]@[ip_address]:[destination_path]
+scp -r Backend_VM user@192.168.10.20:/home/user/
+```
+
+---
+
 ## Verification Checklist
 
 1.  **Database**: Can you ping `192.168.10.30` from the Backend VM?
